@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeno Store — Plugin & Jasa Minecraft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ===== HERO ===== */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 20px 80px;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Diagonal accent lines */
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(135deg, transparent 40%, rgba(0,255,135,0.02) 50%, transparent 60%),
+                linear-gradient(-135deg, transparent 40%, rgba(0,255,135,0.015) 50%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-inner { position: relative; z-index: 2; }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 18px;
+            background: rgba(0,255,135,0.06);
+            border: 1px solid rgba(0,255,135,0.2);
+            border-radius: 2px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--green);
+            margin-bottom: 32px;
+            font-family: 'JetBrains Mono', monospace;
+            animation: fadeUp 0.6s ease both;
+        }
+        .hero-eyebrow-dot {
+            width: 6px; height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: blink 1.5s ease-in-out infinite;
+            box-shadow: 0 0 6px var(--green);
+        }
+
+        .hero h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 10px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            animation: fadeUp 0.6s ease 0.1s both;
+        }
+        .hero h1 .accent {
+            color: var(--green);
+            text-shadow: 0 0 40px rgba(0,255,135,0.4), 0 0 80px rgba(0,255,135,0.15);
+        }
+
+        .hero-sub-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(0.65rem, 2vw, 0.8rem);
+            letter-spacing: 6px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 32px;
+            animation: fadeUp 0.6s ease 0.15s both;
+        }
+
+        .hero p {
+            font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+            color: var(--text2);
+            max-width: 480px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+            animation: fadeUp 0.6s ease 0.2s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.6s ease 0.3s both;
+        }
+
+        /* Corner decorations */
+        .hero-corner {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            pointer-events: none;
+        }
+        .hero-corner-tl { top: 80px; left: 24px; border-top: 2px solid rgba(0,255,135,0.2); border-left: 2px solid rgba(0,255,135,0.2); }
+        .hero-corner-tr { top: 80px; right: 24px; border-top: 2px solid rgba(0,255,135,0.2); border-right: 2px solid rgba(0,255,135,0.2); }
+        .hero-corner-bl { bottom: 40px; left: 24px; border-bottom: 2px solid rgba(0,255,135,0.2); border-left: 2px solid rgba(0,255,135,0.2); }
+        .hero-corner-br { bottom: 40px; right: 24px; border-bottom: 2px solid rgba(0,255,135,0.2); border-right: 2px solid rgba(0,255,135,0.2); }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: var(--green);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float-particle linear infinite;
+            box-shadow: 0 0 6px var(--green);
+        }
+        @keyframes float-particle {
+            from { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            to { transform: translateY(-100px) translateX(20px); opacity: 0; }
+        }
+
+        /* ===== TICKER ===== */
+        .ticker-wrap {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: rgba(0,255,135,0.025);
+            padding: 12px 0;
+        }
+        .ticker-track {
+            display: flex;
+            gap: 60px;
+            white-space: nowrap;
+            animation: ticker 30s linear infinite;
+            width: max-content;
+        }
+        .ticker-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .ticker-item .dot { color: var(--green); font-size: 1rem; line-height: 1; }
+        @keyframes ticker {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        /* ===== STATS ===== */
+        .stats {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .stat {
+            text-align: center;
+            padding: 32px 20px;
+            border-right: 1px solid var(--border);
+            position: relative;
+            transition: background 0.3s;
+        }
+        .stat:last-child { border-right: none; }
+        .stat:hover { background: var(--green-subtle); }
+        .stat-num {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--green);
+            display: block;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0,255,135,0.3);
+        }
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* ===== PRODUCTS GRID ===== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        /* Homepage product card variant */
+        .hp-product-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            group: true;
+        }
+        .hp-product-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,255,135,0.04), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .hp-product-card:hover {
+            border-color: rgba(0,255,135,0.35);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 40px rgba(0,255,135,0.06);
+        }
+        .hp-product-card:hover::after { opacity: 1; }
+
+        .hp-product-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .hp-product-card:hover::before { opacity: 1; }
+
+        .product-icon-wrap {
+            width: 52px; height: 52px;
+            background: rgba(0,255,135,0.08);
+            border: 1px solid rgba(0,255,135,0.15);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 18px;
+            transition: all 0.3s;
+        }
+        .hp-product-card:hover .product-icon-wrap {
+            background: rgba(0,255,135,0.15);
+            border-color: rgba(0,255,135,0.3);
+            box-shadow: 0 0 20px rgba(0,255,135,0.15);
+        }
+        .product-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 8px; display: block; }
+        .product-name { font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
+        .product-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
+        .product-price-row { display: flex; align-items: center; justify-content: space-between; }
+        .product-price { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--green); letter-spacing: 1px; text-shadow: 0 0 10px rgba(0,255,135,0.3); }
+        .product-arrow { font-size: 0.8rem; color: var(--muted); transition: all 0.2s; font-family: 'JetBrains Mono', monospace; }
+        .hp-product-card:hover .product-arrow { color: var(--green); transform: translateX(4px); }
+        .product-badge-pos { position: absolute; top: 16px; right: 16px; }
+
+        /* ===== FEATURES ===== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .feature-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 28px 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 2px;
+            background: var(--green);
+            transition: width 0.4s ease;
+        }
+        .feature-card:hover { border-color: rgba(0,255,135,0.2); background: var(--card2); }
+        .feature-card:hover::after { width: 100%; }
+        .feature-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: block;
+        }
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 14px;
+            display: block;
+        }
+        .feature-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .feature-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+
+        /* ===== TERMINAL SECTION ===== */
+        .terminal-section {
+            position: relative;
+            z-index: 1;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 60px 24px;
+        }
+        .terminal-inner {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .terminal-window {
+            background: #000;
+            border: 1px solid rgba(0,255,135,0.2);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--dark2);
+            border-bottom: 1px solid rgba(0,255,135,0.1);
+        }
+        .t-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+        .t-dot-red { background: #ff5f57; }
+        .t-dot-yellow { background: #ffbd2e; }
+        .t-dot-green { background: #28ca41; }
+        .terminal-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--muted);
+            letter-spacing: 1px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .terminal-body {
+            padding: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 2;
+        }
+        .t-line { display: flex; gap: 10px; }
+        .t-prompt { color: var(--green); user-select: none; }
+        .t-cmd { color: var(--text); }
+        .t-output { color: var(--text2); padding-left: 20px; }
+        .t-success { color: var(--green); padding-left: 20px; }
+        .t-active { color: var(--text); }
+        .t-active::after { content: '█'; color: var(--green); animation: blink 1s step-end infinite; }
+
+        /* ===== CTA ===== */
+        .cta-section {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 100px 24px;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0,255,135,0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .cta-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--green);
+            margin-bottom: 20px;
+            display: block;
+        }
+        .cta-section h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+        .cta-section h2 span { color: var(--green); }
+        .cta-section p { color: var(--text2); font-size: 0.95rem; margin-bottom: 40px; max-width: 460px; margin-left: auto; margin-right: auto; }
+        .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+        /* ===== FOOTER ===== */
+        footer {
+            position: relative;
+            z-index: 1;
+            padding: 28px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .footer-logo {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--green);
+        }
+        .footer-logo span { color: var(--muted); }
+        footer p {
+            color: var(--muted);
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+        }
+        footer span.hl { color: var(--green); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .stat:nth-child(2) { border-right: none; }
+            .stat:nth-child(3) { border-bottom: none; }
+            .hero h1 { letter-spacing: 3px; }
+            footer { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-green"></div>
+
+    <!-- Particles -->
+    <div id="particles"></div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="/" class="nav-logo">ZENO<span>STORE</span></a>
+        <ul class="nav-links">
+            <li><a href="/products">Produk</a></li>
+            <li><a href="#fitur">Layanan</a></li>
+            <li><a href="#kontak">Kontak</a></li>
+        </ul>
+        <div class="nav-buttons" id="navButtons">
+            <a href="/login" class="btn-sm btn-outline-sm">Login</a>
+            <a href="/register" class="btn-sm btn-solid-sm">Daftar</a>
+        </div>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- MOBILE MENU -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div id="mobileUserInfo"></div>
+        <div id="mobileMenuItems"></div>
+    </div>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-corner hero-corner-tl"></div>
+        <div class="hero-corner hero-corner-tr"></div>
+        <div class="hero-corner hero-corner-bl"></div>
+        <div class="hero-corner hero-corner-br"></div>
+        <div class="hero-inner">
+            <div class="hero-eyebrow">
+                <span class="hero-eyebrow-dot"></span>
+                System Online — Terpercaya & Profesional
+            </div>
+            <h1>ZENO <span class="accent">STORE</span></h1>
+            <div class="hero-sub-title">// Plugin & Jasa Minecraft</div>
+            <p>Plugin Premium, Asset Minecraft, Backup Server, dan Jasa Website. Semua kebutuhan server Minecraft kamu dalam satu tempat.</p>
+            <div class="hero-buttons">
+                <a href="/products" class="btn btn-primary">Lihat Produk →</a>
+                <a href="/register" class="btn btn-secondary">Daftar Gratis</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- TICKER -->
+    <div class="ticker-wrap">
+        <div class="ticker-track" id="tickerTrack">
+            <span class="ticker-item"><span class="dot">◆</span> Plugin Premium</span>
+            <span class="ticker-item"><span class="dot">◆</span> Asset & Mode</span>
+            <span class="ticker-item"><span class="dot">◆</span> Backup Server</span>
+            <span class="ticker-item"><span class="dot">◆</span> Jasa Website</span>
+            <span class="ticker-item"><span class="dot">◆</span> Support 24/7</span>
+            <span class="ticker-item"><span class="dot">◆</span> 100% Original</span>
+            <span class="ticker-item"><span class="dot">◆</span> Transaksi Aman</span>
+            <span class="ticker-item"><span class="dot">◆</span> Pengiriman Cepat</span>
+            <!-- duplicated for loop -->
+            <span class="ticker-item"><span class="dot">◆</span> Plugin Premium</span>
+            <span class="ticker-item"><span class="dot">◆</span> Asset & Mode</span>
+            <span class="ticker-item"><span class="dot">◆</span> Backup Server</span>
+            <span class="ticker-item"><span class="dot">◆</span> Jasa Website</span>
+            <span class="ticker-item"><span class="dot">◆</span> Support 24/7</span>
+            <span class="ticker-item"><span class="dot">◆</span> 100% Original</span>
+            <span class="ticker-item"><span class="dot">◆</span> Transaksi Aman</span>
+            <span class="ticker-item"><span class="dot">◆</span> Pengiriman Cepat</span>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-num" data-target="500">0</span>
+            <span class="stat-label">Pelanggan</span>
+        </div>
+        <div class="stat">
+            <span class="stat-num" data-target="50">0</span>
+            <span class="stat-label">Plugin</span>
+        </div>
+        <div class="stat">
+            <span class="stat-num" data-target="100">0</span>
+            <span class="stat-label">% Garansi</span>
+        </div>
+        <div class="stat">
+            <span class="stat-num">24/7</span>
+            <span class="stat-label">Support</span>
+        </div>
+    </div>
+
+    <!-- PRODUK -->
+    <div class="section">
+        <div style="text-align:center; margin-bottom:50px;">
+            <div class="section-tag">// 01 — Katalog</div>
+            <h2 class="section-title">Produk Unggulan</h2>
+            <p style="color:var(--text2); font-size:0.88rem; margin-top:10px; max-width:400px; margin-left:auto; margin-right:auto; line-height:1.7;">
+                Pilih produk sesuai kebutuhan server Minecraft kamu
+            </p>
+        </div>
+        <div class="products-grid">
+            <a href="/products" class="hp-product-card">
+                <div class="product-badge-pos"><span class="badge badge-blue">HOT</span></div>
+                <div class="product-icon-wrap">🔌</div>
+                <span class="product-tag">// Plugin</span>
+                <div class="product-name">Plugin Premium</div>
+                <div class="product-desc">Plugin Minecraft premium original. Anti-cheat, Economy, RPG, dan banyak lagi pilihan terbaik.</div>
+                <div class="product-price-row">
+                    <div class="product-price">Mulai Rp 15.000</div>
+                    <span class="product-arrow">→</span>
+                </div>
+            </a>
+            <a href="/products" class="hp-product-card">
+                <div class="product-icon-wrap">🎨</div>
+                <span class="product-tag">// Asset</span>
+                <div class="product-name">Asset & Mode</div>
+                <div class="product-desc">Resource pack, texture, model 3D custom berkualitas tinggi untuk server kamu.</div>
+                <div class="product-price-row">
+                    <div class="product-price">Mulai Rp 10.000</div>
+                    <span class="product-arrow">→</span>
+                </div>
+            </a>
+            <a href="/products" class="hp-product-card">
+                <div class="product-badge-pos"><span class="badge badge-success">NEW</span></div>
+                <div class="product-icon-wrap">💾</div>
+                <span class="product-tag">// Backup</span>
+                <div class="product-name">Backup Server</div>
+                <div class="product-desc">Layanan backup data server Minecraft secara aman, terjadwal, dan terpercaya.</div>
+                <div class="product-price-row">
+                    <div class="product-price">Mulai Rp 25.000</div>
+                    <span class="product-arrow">→</span>
+                </div>
+            </a>
+            <a href="/products" class="hp-product-card">
+                <div class="product-icon-wrap">🌐</div>
+                <span class="product-tag">// Jasa</span>
+                <div class="product-name">Jasa Website</div>
+                <div class="product-desc">Jasa pembuatan website profesional untuk server, toko online, dan berbagai keperluan.</div>
+                <div class="product-price-row">
+                    <div class="product-price">Mulai Rp 150.000</div>
+                    <span class="product-arrow">→</span>
+                </div>
+            </a>
+        </div>
+        <div style="text-align:center; margin-top:40px;">
+            <a href="/products" class="btn btn-primary">Lihat Semua Produk →</a>
+        </div>
+    </div>
+
+    <!-- TERMINAL SECTION -->
+    <div class="terminal-section">
+        <div class="terminal-inner">
+            <div style="text-align:center; margin-bottom:32px;">
+                <div class="section-tag">// 02 — Kenapa Zeno?</div>
+                <h2 class="section-title">Sistem Kami</h2>
+            </div>
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="t-dot t-dot-red"></span>
+                    <span class="t-dot t-dot-yellow"></span>
+                    <span class="t-dot t-dot-green"></span>
+                    <span class="terminal-title">zeno-store — terminal</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">zeno status --all</span></div>
+                    <div class="t-output">Checking system status...</div>
+                    <div class="t-line"><span class="t-success">✓</span><span class="t-cmd" style="color:var(--text2); padding-left:4px;">Plugin delivery: INSTANT — kirim otomatis setelah bayar</span></div>
+                    <div class="t-line"><span class="t-success">✓</span><span class="t-cmd" style="color:var(--text2); padding-left:4px;">License verification: ACTIVE — 100% original berlisensi</span></div>
+                    <div class="t-line"><span class="t-success">✓</span><span class="t-cmd" style="color:var(--text2); padding-left:4px;">Support status: ONLINE — tim siap 24/7</span></div>
+                    <div class="t-line"><span class="t-success">✓</span><span class="t-cmd" style="color:var(--text2); padding-left:4px;">Payment gateway: SECURED — transaksi aman terjamin</span></div>
+                    <div class="t-line" style="margin-top:8px;"><span class="t-prompt">$</span><span class="t-active"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FITUR -->
+    <div class="section" id="fitur">
+        <div style="text-align:center; margin-bottom:50px;">
+            <div class="section-tag">// 03 — Keunggulan</div>
+            <h2 class="section-title">Kenapa Zeno Store?</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-num">01</span>
+                <span class="feature-icon">⚡</span>
+                <div class="feature-title">Pengiriman Cepat</div>
+                <div class="feature-desc">Produk dikirim instan setelah pembayaran dikonfirmasi. Tanpa tunggu lama.</div>
+            </div>
+            <div class="feature-card">
+                <span class="feature-num">02</span>
+                <span class="feature-icon">🛡️</span>
+                <div class="feature-title">100% Original</div>
+                <div class="feature-desc">Semua plugin dan asset adalah produk original berlisensi resmi.</div>
+            </div>
+            <div class="feature-card">
+                <span class="feature-num">03</span>
+                <span class="feature-icon">💬</span>
+                <div class="feature-title">Support 24/7</div>
+                <div class="feature-desc">Tim support siap membantu kamu kapan saja, hari dan malam.</div>
+            </div>
+            <div class="feature-card">
+                <span class="feature-num">04</span>
+                <span class="feature-icon">🔒</span>
+                <div class="feature-title">Transaksi Aman</div>
+                <div class="feature-desc">Sistem pembayaran aman. Data dan privasi kamu selalu terlindungi.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-section" id="kontak">
+        <span class="cta-label">// Bergabung Sekarang</span>
+        <h2>SIAP <span>BERGABUNG?</span></h2>
+        <p>Daftar sekarang dan dapatkan akses ke semua produk & layanan Zeno Store.</p>
+        <div class="cta-buttons">
+            <a href="/register" class="btn btn-primary">Daftar Gratis →</a>
+            <a href="/login" class="btn btn-secondary">Sudah Punya Akun</a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-logo">ZENO<span>STORE</span></div>
+        <p>© 2024 <span class="hl">Zeno Store</span> — All Rights Reserved</p>
+        <p style="color:var(--muted); font-size:0.65rem; font-family:'JetBrains Mono',monospace; letter-spacing:1px;">SYSTEM ONLINE</p>
+    </footer>
+
+    <script>
+        // Particles
+        const pContainer = document.getElementById('particles');
+        for (let i = 0; i < 18; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.cssText = `
+                left: ${Math.random() * 100}%;
+                animation-duration: ${8 + Math.random() * 12}s;
+                animation-delay: ${-Math.random() * 15}s;
+                opacity: ${0.3 + Math.random() * 0.6};
+                width: ${1 + Math.random() * 2}px;
+                height: ${1 + Math.random() * 2}px;
+            `;
+            pContainer.appendChild(p);
+        }
+
+        // Counter animation
+        const counters = document.querySelectorAll('.stat-num[data-target]');
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    const target = parseInt(e.target.dataset.target);
+                    const suffix = e.target.dataset.target === '100' ? '' : '+';
+                    let start = 0;
+                    const duration = 1800;
+                    const step = target / (duration / 16);
+                    const timer = setInterval(() => {
+                        start = Math.min(start + step, target);
+                        e.target.textContent = Math.floor(start) + suffix;
+                        if (start >= target) clearInterval(timer);
+                    }, 16);
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        counters.forEach(c => io.observe(c));
+
+        // Auth state
+        const user = JSON.parse(localStorage.getItem('zenoUser') || 'null');
+        if (user) {
+            document.getElementById('navButtons').innerHTML = `
+                <span class="nav-user">[ ${user.username} ]</span>
+                <a href="/dashboard" class="btn-sm btn-solid-sm">Dashboard</a>
+                <button class="btn-sm btn-outline-sm" onclick="logout()">Logout</button>
+            `;
+        }
+        function logout() {
+            localStorage.removeItem('zenoUser');
+            location.reload();
+        }
+
+        // Hamburger
+        const ham = document.getElementById('hamburger');
+        const menu = document.getElementById('mobileMenu');
+        ham.addEventListener('click', () => {
+            ham.classList.toggle('open');
+            menu.classList.toggle('open');
+        });
+    </script>
+    <script src="/navbar.js"></script>
+    <script>initNavbar("home");</script>
+</body>
+</html>
